@@ -1,9 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_timer/components/animated_wavy_background.dart';
 import 'package:flutter_timer/components/stack_animation.dart';
 import 'package:flutter_timer/ticker.dart';
 import 'package:flutter_timer/timer/bloc/timer_bloc.dart';
+import 'package:vector_math/vector_math.dart' as vector;
 
 class TimerPage extends StatelessWidget {
   const TimerPage({Key? key}) : super(key: key);
@@ -29,16 +32,35 @@ class _TimerViewState extends State<TimerView>
   late AnimationController _controller;
   late Animation<double> _animation;
 
+  List<Offset> waveList = [];
+
   @override
   void initState() {
     super.initState();
+
     _controller = AnimationController(
       duration: const Duration(seconds: 15),
       value: 0.0,
       upperBound: 1.0,
       lowerBound: 0.0,
       vsync: this,
-    )..repeat(reverse: true);
+    )
+      ..repeat(reverse: true)
+      ..addListener(() {
+        waveList.clear();
+        var size = MediaQuery.of(context).size;
+
+        for (int i = 0; i <= size.width.toInt(); i++) {
+          var offset = Offset(
+              i.toDouble(),
+              math.sin((_controller.value * 360 - i) %
+                          360 *
+                          vector.degrees2Radians) *
+                      20 +
+                  50);
+          waveList.add(offset);
+        }
+      });
 
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
   }
@@ -58,7 +80,17 @@ class _TimerViewState extends State<TimerView>
       ),
       body: Stack(
         children: [
-          AnimatedWavyBackground(animation: _animation),
+          AnimatedWavyBackground(
+            animation: _animation,
+            waveList: waveList,
+            startColor: Colors.indigo.shade100,
+            endColor: Colors.indigo.shade900,
+          ),
+          AnimatedWavyBackground(
+            animation: _animation,
+            startColor: Colors.blue.shade50,
+            endColor: Colors.blue.shade900,
+          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,

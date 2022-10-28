@@ -3,24 +3,59 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class AnimatedWavyBackground extends StatelessWidget {
-  const AnimatedWavyBackground({Key? key, required this.animation})
+  AnimatedWavyBackground(
+      {Key? key,
+      required this.animation,
+      this.waveList,
+      required this.startColor,
+      required this.endColor})
       : super(key: key);
 
   final Animation<double> animation;
+  final Color startColor;
+  final Color endColor;
+
+  // Use List<Offset>? waveList parameter only if you want to define a background with your own shape
+  List<Offset>? waveList;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context, Widget? child) {
+      builder: (context, child) {
         return ClipPath(
-          clipper: MyWavyClipper(animation.value),
+          clipper: (waveList == null)
+              ? MyWavyClipper(animation.value)
+              : CustomClipperFromOffsetList(animation.value, waveList!),
           child: child,
         );
       },
-      child: const Background(),
+      child: GradientBackground(
+        startColor: startColor,
+        endColor: endColor,
+      ),
     );
   }
+}
+
+class CustomClipperFromOffsetList extends CustomClipper<Path> {
+  final double animation;
+  List<Offset> waveList = [];
+
+  CustomClipperFromOffsetList(this.animation, this.waveList);
+
+  @override
+  Path getClip(Size size) {
+    return Path()
+      ..addPolygon(waveList, false)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0.0, size.height)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(CustomClipperFromOffsetList oldClipper) =>
+      animation != oldClipper.animation;
 }
 
 class MyWavyClipper extends CustomClipper<Path> {
@@ -70,8 +105,13 @@ class MyWavyClipper extends CustomClipper<Path> {
   bool shouldReclip(covariant CustomClipper<dynamic> oldClipper) => true;
 }
 
-class Background extends StatelessWidget {
-  const Background({Key? key}) : super(key: key);
+class GradientBackground extends StatelessWidget {
+  const GradientBackground(
+      {Key? key, required this.startColor, required this.endColor})
+      : super(key: key);
+
+  final Color startColor;
+  final Color endColor;
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +121,7 @@ class Background extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.blue.shade50,
-              Colors.blue.shade900,
-            ],
+            colors: [startColor, endColor],
           ),
         ),
       ),
