@@ -152,6 +152,7 @@ class ActionButtons extends StatelessWidget {
   }
 
   List<Widget> _getActionButtons(TimerState state, BuildContext context) {
+    var separationDistanceForAnimation = 150.0;
     return <Widget>[
       if (state is TimerInitial) ...[
         TextButton(
@@ -162,7 +163,7 @@ class ActionButtons extends StatelessWidget {
       if (state is TimerRunInProgress) ...[
         StackOpenAnimation(
           duration: const Duration(seconds: 1),
-          separationDistance: 150.0,
+          separationDistance: separationDistanceForAnimation,
           leftWidget: TextButton(
             onPressed: () => context.read<TimerBloc>().add(TimerPaused()),
             child: Icon(Icons.pause),
@@ -177,7 +178,7 @@ class ActionButtons extends StatelessWidget {
       if (state is TimerRunPause) ...[
         StackOpenAnimation(
           duration: const Duration(seconds: 1),
-          separationDistance: 150.0,
+          separationDistance: separationDistanceForAnimation,
           leftWidget: TextButton(
             onPressed: () => context.read<TimerBloc>().add(TimerResumed()),
             child: Icon(Icons.play_arrow),
@@ -192,7 +193,7 @@ class ActionButtons extends StatelessWidget {
       if (state is TimerRunComplete) ...[
         StackCloseAnimation(
           duration: const Duration(seconds: 1),
-          separationDistance: 150.0,
+          separationDistance: separationDistanceForAnimation,
           leftWidget: TextButton(
             onPressed: () => Null,
             child: const Icon(Icons.pause),
@@ -207,7 +208,7 @@ class ActionButtons extends StatelessWidget {
       if (state is TimerInitialAfterPause) ...[
         StackCloseAnimation(
           duration: const Duration(seconds: 1),
-          separationDistance: 150.0,
+          separationDistance: separationDistanceForAnimation,
           leftWidget: TextButton(
             onPressed: () => context.read<TimerBloc>().add(TimerStarted()),
             child: const Icon(Icons.play_arrow),
@@ -221,7 +222,7 @@ class ActionButtons extends StatelessWidget {
       if (state is TimerInitialWhileRunning) ...[
         StackCloseAnimation(
           duration: const Duration(seconds: 1),
-          separationDistance: 150.0,
+          separationDistance: separationDistanceForAnimation,
           leftWidget: TextButton(
             onPressed: () => context.read<TimerBloc>().add(TimerStarted()),
             child: const Icon(Icons.play_arrow),
