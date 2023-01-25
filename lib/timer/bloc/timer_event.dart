@@ -9,9 +9,8 @@ abstract class TimerEvent extends Equatable {
 }
 
 class TimerStarted extends TimerEvent {
-  // const TimerStarted({required this.duration});
-  // final int duration; //todo: why duration needed for events?
-  const TimerStarted();
+  const TimerStarted({required this.duration});
+  final int duration;
 }
 
 class TimerTicked extends TimerEvent {
@@ -40,4 +39,9 @@ class TimerPausedAndReset extends TimerEvent {
 
 class TimerRunningAndReset extends TimerEvent {
   const TimerRunningAndReset();
+}
+
+class TimerChanged extends TimerEvent {
+  const TimerChanged({required this.newDuration});
+  final int newDuration;
 }

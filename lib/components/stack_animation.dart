@@ -77,31 +77,41 @@ class StackAnimation extends StatelessWidget {
       duration: duration,
       tween: Tween<double>(begin: begin, end: end),
       curve: Curves.easeInOut,
-      builder: (_, value, __) => Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          if (leftWidgetIsOver) ...[
-            Padding(
-              padding: EdgeInsets.only(left: value),
-              child: rightWidget,
-            ),
-            Padding(
-              padding: EdgeInsets.only(right: value),
-              child: leftWidget,
-            ),
-          ] else ...[
-            Padding(
-              padding: EdgeInsets.only(right: value),
-              child: leftWidget,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: value),
-              child: rightWidget,
-            ),
-          ]
-        ],
-      ),
+      builder: (_, value, __) {
+        var opacityLevel = (value / (begin - end)).abs();
+
+        return Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            if (leftWidgetIsOver) ...[
+              Padding(
+                padding: EdgeInsets.only(left: value),
+                child: Opacity(
+                  opacity: opacityLevel,
+                  child: rightWidget,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(right: value),
+                child: leftWidget,
+              ),
+            ] else ...[
+              Opacity(
+                opacity: opacityLevel,
+                child: Padding(
+                  padding: EdgeInsets.only(right: value),
+                  child: leftWidget,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: value),
+                child: rightWidget,
+              ),
+            ]
+          ],
+        );
+      },
     );
   }
 }

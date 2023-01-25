@@ -1,12 +1,14 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:flutter_timer/components/animated_wavy_background.dart';
-import 'package:flutter_timer/components/stack_animation.dart';
 import 'package:flutter_timer/ticker.dart';
 import 'package:flutter_timer/timer/bloc/timer_bloc.dart';
+import 'package:flutter_timer/timer/view/time_picker_page.dart';
 import 'package:vector_math/vector_math.dart' as vector;
+
+import 'components/action_buttons.dart';
 
 class TimerPage extends StatelessWidget {
   const TimerPage({Key? key}) : super(key: key);
@@ -15,29 +17,35 @@ class TimerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => TimerBloc(ticker: const Ticker()),
-      child: TimerView(),
+      child: const TimerView(),
     );
   }
 }
 
 class TimerView extends StatefulWidget {
-  TimerView({Key? key}) : super(key: key);
+  const TimerView({Key? key}) : super(key: key);
 
   @override
   State<TimerView> createState() => _TimerViewState();
 }
 
-class _TimerViewState extends State<TimerView>
-    with SingleTickerProviderStateMixin {
+class _TimerViewState extends State<TimerView> with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+
+  late AnimationController _controllerBottomSheet;
+  late Animation<double> _animationBottomSheet;
 
   List<Offset> waveList = [];
 
   @override
   void initState() {
     super.initState();
+    createBackgroundAnimations();
+    createBottomSheetAnimation();
+  }
 
+  void createBackgroundAnimations() {
     _controller = AnimationController(
       duration: const Duration(seconds: 15),
       value: 0.0,
@@ -65,18 +73,50 @@ class _TimerViewState extends State<TimerView>
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
   }
 
+  void createBottomSheetAnimation() {
+    _controllerBottomSheet = AnimationController(
+      duration: const Duration(seconds: 12),
+      value: 0.5,
+      upperBound: 1.0,
+      lowerBound: 0.0,
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _animationBottomSheet = CurvedAnimation(
+        parent: _controllerBottomSheet, curve: Curves.easeInOut);
+  }
+
   @override
   void dispose() {
     _controller.dispose();
+    _controllerBottomSheet.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    int initialDuration =
+        context.select<TimerBloc, int>((_) => TimerBloc.initialDuration);
+
+    var appBarItemsColor = Colors.indigo.withAlpha(80);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter Timer'),
-        backgroundColor: Theme.of(context).primaryColor,
+      appBar: NeumorphicAppBar(
+        title: NeumorphicText(
+          'Soft Timer',
+          style: NeumorphicStyle(
+            color: appBarItemsColor,
+          ),
+          textStyle: NeumorphicTextStyle(
+            fontSize: 25.0,
+          ),
+        ),
+        centerTitle: true,
+        leading: NeumorphicButton(
+          onPressed: () => Null,
+          style: NeumorphicStyle(disableDepth: true),
+          child: Icon(Icons.alarm_on, color: appBarItemsColor),
+        ),
       ),
       body: Stack(
         children: [
@@ -94,10 +134,21 @@ class _TimerViewState extends State<TimerView>
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 50.0),
-                child: TimerText(),
+                child: GestureDetector(
+                  onTap: () => showModalBottomSheet(
+                    context: context,
+                    builder: (_) => TimePickerPage(
+                        context: context,
+                        animationBottomSheet: _animationBottomSheet,
+                        initialDurationInSeconds: initialDuration),
+                    backgroundColor: Colors.transparent,
+                    barrierColor: Colors.indigo.shade700.withAlpha(100),
+                  ),
+                  child: TimerText(),
+                ),
               ),
               ActionButtons(),
             ],
@@ -129,110 +180,5 @@ class TimerText extends StatelessWidget {
             ),
       ),
     );
-  }
-}
-
-class ActionButtons extends StatelessWidget {
-  const ActionButtons({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<TimerBloc, TimerState>(
-      buildWhen: (previous, current) =>
-          previous.runtimeType != current.runtimeType,
-      builder: (context, state) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _getActionButtons(state, context),
-        );
-      },
-    );
-  }
-
-  List<Widget> _getActionButtons(TimerState state, BuildContext context) {
-    var separationDistanceForAnimation = 150.0;
-    return <Widget>[
-      if (state is TimerInitial) ...[
-        TextButton(
-          onPressed: () => context.read<TimerBloc>().add(TimerStarted()),
-          child: Icon(Icons.play_arrow),
-        )
-      ],
-      if (state is TimerRunInProgress) ...[
-        StackOpenAnimation(
-          duration: const Duration(seconds: 1),
-          separationDistance: separationDistanceForAnimation,
-          leftWidget: TextButton(
-            onPressed: () => context.read<TimerBloc>().add(TimerPaused()),
-            child: Icon(Icons.pause),
-          ),
-          rightWidget: TextButton(
-            onPressed: () =>
-                context.read<TimerBloc>().add(TimerRunningAndReset()),
-            child: Icon(Icons.replay),
-          ),
-        ),
-      ],
-      if (state is TimerRunPause) ...[
-        StackOpenAnimation(
-          duration: const Duration(seconds: 1),
-          separationDistance: separationDistanceForAnimation,
-          leftWidget: TextButton(
-            onPressed: () => context.read<TimerBloc>().add(TimerResumed()),
-            child: Icon(Icons.play_arrow),
-          ),
-          rightWidget: TextButton(
-            onPressed: () =>
-                context.read<TimerBloc>().add(TimerPausedAndReset()),
-            child: Icon(Icons.replay),
-          ),
-        ),
-      ],
-      if (state is TimerRunComplete) ...[
-        StackCloseAnimation(
-          duration: const Duration(seconds: 1),
-          separationDistance: separationDistanceForAnimation,
-          leftWidget: TextButton(
-            onPressed: () => Null,
-            child: const Icon(Icons.pause),
-          ),
-          rightWidget: TextButton(
-            onPressed: () => context.read<TimerBloc>().add(TimerReset()),
-            child: const Icon(Icons.replay),
-          ),
-          leftWidgetIsOver: false,
-        ),
-      ],
-      if (state is TimerInitialAfterPause) ...[
-        StackCloseAnimation(
-          duration: const Duration(seconds: 1),
-          separationDistance: separationDistanceForAnimation,
-          leftWidget: TextButton(
-            onPressed: () => context.read<TimerBloc>().add(TimerStarted()),
-            child: const Icon(Icons.play_arrow),
-          ),
-          rightWidget: TextButton(
-            onPressed: () => Null,
-            child: const Icon(Icons.replay),
-          ),
-        ),
-      ],
-      if (state is TimerInitialWhileRunning) ...[
-        StackCloseAnimation(
-          duration: const Duration(seconds: 1),
-          separationDistance: separationDistanceForAnimation,
-          leftWidget: TextButton(
-            onPressed: () => context.read<TimerBloc>().add(TimerStarted()),
-            child: const Icon(Icons.play_arrow),
-          ),
-          rightWidget: TextButton(
-            onPressed: () => Null,
-            child: const Icon(Icons.replay),
-          ),
-        ),
-      ]
-    ];
   }
 }

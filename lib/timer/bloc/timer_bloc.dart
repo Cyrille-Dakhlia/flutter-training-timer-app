@@ -9,14 +9,14 @@ part 'timer_event.dart';
 part 'timer_state.dart';
 
 class TimerBloc extends Bloc<TimerEvent, TimerState> {
-  static const int _duration = 20;
+  static int initialDuration = 7 * 60;
   final Ticker _ticker;
 
   StreamSubscription<int>? _tickerSubscription;
 
   TimerBloc({required Ticker ticker})
       : _ticker = ticker,
-        super(const TimerInitial(_duration)) {
+        super(TimerInitial(initialDuration)) {
     on<TimerStarted>(_onStarted);
     on<TimerTicked>(_onTicked);
     on<TimerPaused>(_onPaused);
@@ -24,6 +24,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<TimerReset>(_onReset);
     on<TimerPausedAndReset>(_onPausedAndReset);
     on<TimerRunningAndReset>(_onRunningAndReset);
+    on<TimerChanged>(_onChanged);
   }
 
   @override
@@ -33,13 +34,11 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   void _onStarted(TimerStarted event, emit) {
-    // emit(TimerRunInProgress(event.duration));
-    emit(TimerRunInProgress(state.duration));
+    emit(TimerRunInProgress(event.duration));
     _tickerSubscription?.cancel();
     _tickerSubscription = _ticker
-        // .tickWithStreamPeriodic(ticks: event.duration)
-        .tickWithStreamPeriodic(ticks: state.duration)
-        // .tickWithYield(state.duration)
+        .tickWithStreamPeriodic(ticks: event.duration)
+        // .tickWithYield(event.duration)
         .listen((duration) => add(TimerTicked(duration: duration)));
   }
 
@@ -65,16 +64,22 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   void _onReset(event, emit) {
     _tickerSubscription?.cancel();
-    emit(const TimerInitial(_duration));
+    emit(TimerInitial(initialDuration));
   }
 
   void _onPausedAndReset(event, emit) {
     _tickerSubscription?.cancel();
-    emit(TimerInitialAfterPause(_duration));
+    emit(TimerInitialAfterPause(initialDuration));
   }
 
   void _onRunningAndReset(event, emit) {
     _tickerSubscription?.cancel();
-    emit(TimerInitialWhileRunning(_duration));
+    emit(TimerInitialWhileRunning(initialDuration));
+  }
+
+  void _onChanged(TimerChanged event, Emitter<TimerState> emit) {
+    _tickerSubscription?.cancel();
+    initialDuration = event.newDuration;
+    emit(TimerInitial(event.newDuration));
   }
 }
