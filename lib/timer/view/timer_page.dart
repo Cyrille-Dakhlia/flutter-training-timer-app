@@ -174,7 +174,7 @@ class TimerText extends StatelessWidget {
     return Center(
       child: Text(
         '$minutesString:$secondsString',
-        style: Theme.of(context).textTheme.headline1?.copyWith(
+        style: Theme.of(context).textTheme.displayLarge?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w200,
             ),
