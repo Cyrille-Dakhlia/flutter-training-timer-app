@@ -45,6 +45,8 @@ class _TimerViewState extends State<TimerView> with TickerProviderStateMixin {
 
   List<Offset> waveList = [];
 
+  bool isSoundActivated = true;
+
   @override
   void initState() {
     super.initState();
@@ -120,9 +122,17 @@ class _TimerViewState extends State<TimerView> with TickerProviderStateMixin {
         ),
         centerTitle: true,
         leading: NeumorphicButton(
-          onPressed: () => Null, //todo: should have settings to disable sound
+          onPressed: () {
+            isSoundActivated = !isSoundActivated;
+            setState(() {});
+            var soundNotification = context.read<SoundNotification>();
+            isSoundActivated
+                ? soundNotification.enableSound()
+                : soundNotification.disableSound();
+          },
           style: NeumorphicStyle(disableDepth: true),
-          child: Icon(Icons.alarm_on, color: appBarItemsColor),
+          child: Icon(isSoundActivated ? Icons.alarm_on : Icons.alarm_off,
+              color: appBarItemsColor),
         ),
       ),
       body: BlocListener<TimerBloc, TimerState>(
