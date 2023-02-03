@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:flutter_timer/timer/view/timer_page.dart';
 
@@ -6,6 +7,10 @@ class TimerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return NeumorphicApp(
       themeMode: ThemeMode.light,
       title: 'Soft Timer',
