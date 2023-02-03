@@ -1,11 +1,14 @@
 import 'dart:math' as math;
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:flutter_timer/components/animated_wavy_background.dart';
+import 'package:flutter_timer/sound/sound_%20notification.dart';
 import 'package:flutter_timer/ticker.dart';
 import 'package:flutter_timer/timer/bloc/timer_bloc.dart';
 import 'package:flutter_timer/timer/view/time_picker_page.dart';
+import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math.dart' as vector;
 
 import 'components/action_buttons.dart';
@@ -17,7 +20,11 @@ class TimerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => TimerBloc(ticker: const Ticker()),
-      child: const TimerView(),
+      child: Provider(
+        create: (_) => SoundNotification(player: AudioPlayer()),
+        lazy: false,
+        child: const TimerView(),
+      ),
     );
   }
 }
@@ -113,47 +120,54 @@ class _TimerViewState extends State<TimerView> with TickerProviderStateMixin {
         ),
         centerTitle: true,
         leading: NeumorphicButton(
-          onPressed: () => Null,
+          onPressed: () => Null, //todo: should have settings to disable sound
           style: NeumorphicStyle(disableDepth: true),
           child: Icon(Icons.alarm_on, color: appBarItemsColor),
         ),
       ),
-      body: Stack(
-        children: [
-          AnimatedWavyBackground(
-            animation: _animation,
-            waveList: waveList,
-            startColor: Colors.indigo.shade100,
-            endColor: Colors.indigo.shade900,
-          ),
-          AnimatedWavyBackground(
-            animation: _animation,
-            startColor: Colors.blue.shade50,
-            endColor: Colors.blue.shade900,
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 50.0),
-                child: GestureDetector(
-                  onTap: () => showModalBottomSheet(
-                    context: context,
-                    builder: (_) => TimePickerPage(
-                        context: context,
-                        animationBottomSheet: _animationBottomSheet,
-                        initialDurationInSeconds: initialDuration),
-                    backgroundColor: Colors.transparent,
-                    barrierColor: Colors.indigo.shade700.withAlpha(100),
+      body: BlocListener<TimerBloc, TimerState>(
+        listener: (context, state) {
+          if (state.runtimeType == TimerRunComplete) {
+            context.read<SoundNotification>().playEndTimerSound();
+          }
+        },
+        child: Stack(
+          children: [
+            AnimatedWavyBackground(
+              animation: _animation,
+              waveList: waveList,
+              startColor: Colors.indigo.shade100,
+              endColor: Colors.indigo.shade900,
+            ),
+            AnimatedWavyBackground(
+              animation: _animation,
+              startColor: Colors.blue.shade50,
+              endColor: Colors.blue.shade900,
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 50.0),
+                  child: GestureDetector(
+                    onTap: () => showModalBottomSheet(
+                      context: context,
+                      builder: (_) => TimePickerPage(
+                          context: context,
+                          animationBottomSheet: _animationBottomSheet,
+                          initialDurationInSeconds: initialDuration),
+                      backgroundColor: Colors.transparent,
+                      barrierColor: Colors.indigo.shade700.withAlpha(100),
+                    ),
+                    child: TimerText(),
                   ),
-                  child: TimerText(),
                 ),
-              ),
-              ActionButtons(),
-            ],
-          ),
-        ],
+                ActionButtons(),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
