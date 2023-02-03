@@ -1,11 +1,14 @@
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:vibration/vibration.dart';
 
-class SoundNotification {
+class SoundAndVibrationNotification {
   final AudioPlayer _player;
+  bool _isVibrationActivated = true;
 
-  SoundNotification({required AudioPlayer player}) : _player = player {
+  SoundAndVibrationNotification({required AudioPlayer player})
+      : _player = player {
     _player.setVolume(100.0);
   }
 
@@ -15,6 +18,14 @@ class SoundNotification {
     _player.play(AssetSource('end_timer_bubble_sound_$fileNumber.wav'));
   }
 
+  void playEndTimerVibration() async {
+    if (_isVibrationActivated && (await Vibration.hasVibrator() ?? false)) {
+      Vibration.vibrate();
+    }
+  }
+
   void disableSound() => _player.setVolume(0.0);
   void enableSound() => _player.setVolume(100.0);
+  void disableVibration() => _isVibrationActivated = false;
+  void enableVibration() => _isVibrationActivated = true;
 }

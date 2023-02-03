@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:flutter_timer/components/animated_wavy_background.dart';
+import 'package:flutter_timer/presentation/vibration_off_icon_icons.dart';
 import 'package:flutter_timer/sound/sound_%20notification.dart';
 import 'package:flutter_timer/ticker.dart';
 import 'package:flutter_timer/timer/bloc/timer_bloc.dart';
@@ -21,7 +22,7 @@ class TimerPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => TimerBloc(ticker: const Ticker()),
       child: Provider(
-        create: (_) => SoundNotification(player: AudioPlayer()),
+        create: (_) => SoundAndVibrationNotification(player: AudioPlayer()),
         lazy: false,
         child: const TimerView(),
       ),
@@ -46,6 +47,7 @@ class _TimerViewState extends State<TimerView> with TickerProviderStateMixin {
   List<Offset> waveList = [];
 
   bool isSoundActivated = true;
+  bool isVibrationActivated = true;
 
   @override
   void initState() {
@@ -125,20 +127,44 @@ class _TimerViewState extends State<TimerView> with TickerProviderStateMixin {
           onPressed: () {
             isSoundActivated = !isSoundActivated;
             setState(() {});
-            var soundNotification = context.read<SoundNotification>();
+            var soundAndVibrationNotification =
+                context.read<SoundAndVibrationNotification>();
             isSoundActivated
-                ? soundNotification.enableSound()
-                : soundNotification.disableSound();
+                ? soundAndVibrationNotification.enableSound()
+                : soundAndVibrationNotification.disableSound();
           },
           style: NeumorphicStyle(disableDepth: true),
           child: Icon(isSoundActivated ? Icons.alarm_on : Icons.alarm_off,
               color: appBarItemsColor),
         ),
+        actions: [
+          NeumorphicButton(
+            onPressed: () {
+              isVibrationActivated = !isVibrationActivated;
+              setState(() {});
+              var soundAndVibrationNotification =
+                  context.read<SoundAndVibrationNotification>();
+              isVibrationActivated
+                  ? soundAndVibrationNotification.enableVibration()
+                  : soundAndVibrationNotification.disableVibration();
+            },
+            style: NeumorphicStyle(disableDepth: true),
+            child: Icon(
+              isVibrationActivated
+                  ? Icons.vibration
+                  : VibrationOffIcon.vibration_off,
+              color: appBarItemsColor,
+            ),
+          ),
+        ],
       ),
       body: BlocListener<TimerBloc, TimerState>(
         listener: (context, state) {
           if (state.runtimeType == TimerRunComplete) {
-            context.read<SoundNotification>().playEndTimerSound();
+            context.read<SoundAndVibrationNotification>().playEndTimerSound();
+            context
+                .read<SoundAndVibrationNotification>()
+                .playEndTimerVibration();
           }
         },
         child: Stack(
