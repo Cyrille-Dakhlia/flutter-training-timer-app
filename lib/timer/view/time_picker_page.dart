@@ -45,8 +45,8 @@ class TimePickerPage extends StatelessWidget {
             ),
             NeumorphicButton(
               onPressed: () {
-                _context.read<TimerBloc>().add(
-                    TimerChanged(newDuration: _selectedDuration.inSeconds));
+                _context.read<TimerBloc>().add(TimerChanged(
+                    newDurationInSeconds: _selectedDuration.inSeconds));
                 Navigator.pop(context);
               },
               style: NeumorphicStyle(

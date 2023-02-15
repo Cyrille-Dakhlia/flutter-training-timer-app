@@ -106,8 +106,8 @@ class _TimerViewState extends State<TimerView> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    int initialDuration =
-        context.select<TimerBloc, int>((_) => TimerBloc.initialDuration);
+    int initialDuration = context
+        .select<TimerBloc, int>((_) => TimerBloc.initialDurationInSeconds);
 
     var appBarItemsColor = Colors.indigo.withAlpha(80);
 
@@ -216,7 +216,8 @@ class TimerText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final duration = context.select((TimerBloc bloc) => bloc.state.duration);
+    final duration =
+        context.select((TimerBloc bloc) => bloc.state.durationInSeconds);
     final minutesString =
         ((duration / 60) % 60).floor().toString().padLeft(2, '0');
     final secondsString = (duration % 60).toString().padLeft(2, '0');

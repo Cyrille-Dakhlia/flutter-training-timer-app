@@ -14,7 +14,7 @@ class ActionButtons extends StatelessWidget {
     return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (previous, current) =>
           current.runtimeType != previous.runtimeType ||
-          current.duration != previous.duration,
+          current.durationInSeconds != previous.durationInSeconds,
       builder: (context, state) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -47,7 +47,7 @@ class ActionButtons extends StatelessWidget {
         NeumorphicButton(
           onPressed: () => context
               .read<TimerBloc>()
-              .add(TimerStarted(duration: state.duration)),
+              .add(TimerStarted(durationInSeconds: state.durationInSeconds)),
           style: neumorphicStyleTimerStopped,
           child: Icon(
             Icons.play_arrow,
@@ -118,7 +118,7 @@ class ActionButtons extends StatelessWidget {
           leftWidget: NeumorphicButton(
             onPressed: () => context
                 .read<TimerBloc>()
-                .add(TimerStarted(duration: state.duration)),
+                .add(TimerStarted(durationInSeconds: state.durationInSeconds)),
             style: neumorphicStyleTimerStopped,
             child: const Icon(Icons.play_arrow),
           ),
@@ -136,7 +136,7 @@ class ActionButtons extends StatelessWidget {
           leftWidget: NeumorphicButton(
             onPressed: () => context
                 .read<TimerBloc>()
-                .add(TimerStarted(duration: state.duration)),
+                .add(TimerStarted(durationInSeconds: state.durationInSeconds)),
             style: neumorphicStyleTimerStopped,
             child: const Icon(Icons.play_arrow),
           ),

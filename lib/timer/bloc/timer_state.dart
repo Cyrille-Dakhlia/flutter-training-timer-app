@@ -2,32 +2,32 @@ part of 'timer_bloc.dart';
 
 @immutable
 abstract class TimerState extends Equatable {
-  final int duration;
-  const TimerState(this.duration);
+  final int durationInSeconds;
+  const TimerState(this.durationInSeconds);
 
   @override
-  List<Object> get props => [duration];
+  List<Object> get props => [durationInSeconds];
 }
 
 class TimerInitial extends TimerState {
-  const TimerInitial(super.duration);
+  const TimerInitial(super.durationInSeconds);
 
   @override
-  String toString() => 'TimerInitial { duration: $duration }';
+  String toString() => 'TimerInitial { duration: $durationInSeconds }';
 }
 
 class TimerRunInProgress extends TimerState {
-  const TimerRunInProgress(super.duration);
+  const TimerRunInProgress(super.durationInSeconds);
 
   @override
-  String toString() => 'TimerRunInProgress { duration: $duration }';
+  String toString() => 'TimerRunInProgress { duration: $durationInSeconds }';
 }
 
 class TimerRunPause extends TimerState {
-  const TimerRunPause(super.duration);
+  const TimerRunPause(super.durationInSeconds);
 
   @override
-  String toString() => 'TimerRunPause { duration: $duration }';
+  String toString() => 'TimerRunPause { duration: $durationInSeconds }';
 }
 
 class TimerRunComplete extends TimerState {
@@ -35,20 +35,22 @@ class TimerRunComplete extends TimerState {
 
   @override
   String toString() {
-    return 'TimerRunComplete { duration: $duration }';
+    return 'TimerRunComplete { duration: $durationInSeconds }';
   }
 }
 
 class TimerInitialAfterPause extends TimerState {
-  const TimerInitialAfterPause(super.duration);
+  const TimerInitialAfterPause(super.durationInSeconds);
 
   @override
-  String toString() => 'TimerInitialAfterPause { duration: $duration }';
+  String toString() =>
+      'TimerInitialAfterPause { duration: $durationInSeconds }';
 }
 
 class TimerInitialWhileRunning extends TimerState {
-  const TimerInitialWhileRunning(super.duration);
+  const TimerInitialWhileRunning(super.durationInSeconds);
 
   @override
-  String toString() => 'TimerInitialWhileRunning { duration: $duration }';
+  String toString() =>
+      'TimerInitialWhileRunning { duration: $durationInSeconds }';
 }
