@@ -160,7 +160,7 @@ class _TimerViewState extends State<TimerView> with TickerProviderStateMixin {
       ),
       body: BlocListener<TimerBloc, TimerState>(
         listener: (context, state) {
-          if (state.runtimeType == TimerRunComplete) {
+          if (state is TimerRunComplete) {
             context.read<SoundAndVibrationNotification>().playEndTimerSound();
             context
                 .read<SoundAndVibrationNotification>()
