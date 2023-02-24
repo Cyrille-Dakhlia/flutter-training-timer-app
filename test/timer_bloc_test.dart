@@ -1,9 +1,20 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_timer/app.dart';
 import 'package:flutter_timer/ticker.dart';
-import 'package:flutter_timer/timer/bloc/timer_bloc.dart';
-import 'package:test/test.dart';
+import 'package:flutter_timer/timer/timer.dart';
 
 void main() {
+  // Write test, then run "flutter test --update-goldens" to generate golden img
+  testWidgets('should golden test TimerPage screen',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(TimerApp());
+
+    final foundTimerPage = find.byType(TimerPage);
+
+    expectLater(foundTimerPage, matchesGoldenFile('goldens/timer_page.png'));
+  });
+
   group('TimerBloc', () {
     late TimerBloc timerBloc;
 
